@@ -7,6 +7,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -27,7 +28,6 @@ class PostController {
             }
         }
 
-
         return postRepo.findAll(Sort.by(sortBy))
     }
 
@@ -41,5 +41,15 @@ class PostController {
     @PostMapping("/")
     fun createPost(@RequestBody postInput: PostInput): Post =
         postRepo.save(Post(postInput.title, postInput.description))
+
+    @PutMapping("/{id}")
+    fun updateTitleAndDescriptionById(@PathVariable id: Long, @RequestBody post: Post){
+
+        //val existingTitle = postRepo.findByIdOrNull(id) ?: throw NotFound("post does not exit with this id: $id")
+        val existingTitle = postById(id)
+        existingTitle.title = post.title
+        existingTitle.description = post.description
+        postRepo.save(existingTitle)
+    }
 
 }
