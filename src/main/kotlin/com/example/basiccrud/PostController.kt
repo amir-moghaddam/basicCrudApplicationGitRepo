@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.BeanDescription
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -46,10 +47,15 @@ class PostController {
     fun updateTitleAndDescriptionById(@PathVariable id: Long, @RequestBody post: Post){
 
         //val existingTitle = postRepo.findByIdOrNull(id) ?: throw NotFound("post does not exit with this id: $id")
-        val existingTitle = postById(id)
-        existingTitle.title = post.title
-        existingTitle.description = post.description
-        postRepo.save(existingTitle)
+        val existingTitleAndDescription = postById(id)
+        existingTitleAndDescription.title = post.title
+        existingTitleAndDescription.description = post.description
+        postRepo.save(existingTitleAndDescription)
+    }
+    @DeleteMapping("/{id}")
+    fun deleteTitleAndDescriptionById(@PathVariable id: Long) {
+        val existingTitleAndDescription = postById(id)
+        postRepo.delete(existingTitleAndDescription)
     }
 
 }
