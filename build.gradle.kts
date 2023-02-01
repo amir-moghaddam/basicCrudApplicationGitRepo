@@ -39,6 +39,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework:spring-webflux")
     testImplementation("org.springframework.graphql:spring-graphql-test")
+
+    implementation("jakarta.validation:jakarta.validation-api:3.0.1")
+    //implementation ("org.hibernate.validator:org.hibernate.validator:8.0.0.Final")
+
+
 }
 
 tasks.withType<KotlinCompile> {
