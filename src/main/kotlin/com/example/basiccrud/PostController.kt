@@ -20,10 +20,18 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/post")
 class PostController {
+
     @Autowired
     lateinit var postRepo: PostRepo
-    @GetMapping("/list")
+    @Autowired
+    lateinit var authorRepo: AuthorRepo
 
+    @GetMapping("/list/{authorId}")
+    fun allPostOfAuthor(@PathVariable authorId: Long): Set<Post>{
+        return authorRepo.findByIdOrNull(authorId) ?.posts ?: setOf()
+    }
+
+    @GetMapping("/list")
     fun allPosts(@RequestParam(name="s", required = false , defaultValue = "title") sortBy: String): List<Post> {
 
         with(arrayOf("title","postId", "description")){
@@ -47,21 +55,22 @@ class PostController {
         val description: String)
 
 
-    @PostMapping("/")
-    fun createPost(@Valid @RequestBody postInput: PostInput) {
-        postRepo.save(Post(postInput.title, postInput.description))
+    @PostMapping("/{authorId}")
+    fun createPost(@PathVariable authorId : Long, @Valid @RequestBody postInput: PostInput) {
+        val author = authorRepo.findByIdOrNull(authorId) ?: throw NotFound("author not found with id: $authorId.")
+        postRepo.save(Post(author,postInput.title, postInput.description))
     }
 
-
     @PutMapping("/{id}")
-    fun updateTitleAndDescriptionById(@PathVariable id: Long, @Valid @RequestBody post: Post){
+    fun updateTitleAndDescriptionById(@PathVariable id: Long, @Valid @RequestBody postInput: PostInput){
 
         //val existingTitle = postRepo.findByIdOrNull(id) ?: throw NotFound("post does not exit with this id: $id")
         val existingTitleAndDescription = postById(id)
-        existingTitleAndDescription.title = post.title
-        existingTitleAndDescription.description = post.description
+        existingTitleAndDescription.title = postInput.title
+        existingTitleAndDescription.description = postInput.description
         postRepo.save(existingTitleAndDescription)
     }
+
     @DeleteMapping("/{id}")
     fun deleteTitleAndDescriptionById(@PathVariable id: Long) {
         val existingTitleAndDescription = postById(id)
