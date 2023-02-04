@@ -33,13 +33,11 @@ class PostController {
 
     @GetMapping("/list")
     fun allPosts(@RequestParam(name="s", required = false , defaultValue = "title") sortBy: String): List<Post> {
-
         with(arrayOf("title","postId", "description")){
             if(sortBy !in this){
                 throw UnexpectedArgument("can't sort using $sortBy", *this)
             }
         }
-
         return postRepo.findAll(Sort.by(sortBy))
     }
 
@@ -63,8 +61,6 @@ class PostController {
 
     @PutMapping("/{id}")
     fun updateTitleAndDescriptionById(@PathVariable id: Long, @Valid @RequestBody postInput: PostInput){
-
-        //val existingTitle = postRepo.findByIdOrNull(id) ?: throw NotFound("post does not exit with this id: $id")
         val existingTitleAndDescription = postById(id)
         existingTitleAndDescription.title = postInput.title
         existingTitleAndDescription.description = postInput.description
