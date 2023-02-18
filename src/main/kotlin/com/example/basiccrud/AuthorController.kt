@@ -17,51 +17,36 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/author")
-class AuthorController {
+class AuthorController(
+    private val authorService: AuthorService
+) {
 
     @Autowired
     lateinit var authorRepo: AuthorRepo
     @Autowired
     lateinit var postController: PostController
 
-    @GetMapping("/authorList")
-    fun allAuthors(@RequestParam(name = "s", defaultValue = "name", required = false) sortBy : String): List<Author>{
-        with(arrayOf("name","authorId")){
-            if (sortBy !in this){
-                throw UnexpectedArgument(msg = "can not sort using $sortBy", *this)
-            }
-        }
-        return authorRepo.findAll(Sort.by(sortBy))
-    }
+    @GetMapping("/author-list")
+    fun allAuthors(@RequestParam(name = "s", defaultValue = "name", required = false) sortBy : String): List<Author> =
+        authorService.sortAllAuthors(sortBy)
+
     
     @GetMapping("/{authorId}")
-    fun authorById(@PathVariable authorId: Long): Author {
-        return authorRepo.findByIdOrNull(authorId) ?: throw NotFound(msg = "Author not found with id: $authorId")
-    }
+    fun authorById(@PathVariable authorId: Long): Author = authorService.getAuthorById(authorId)
 
     data class AuthorInput(
         @field: NotBlank
         var name: String
     )
     
-    @PostMapping("/authorList")
-    fun createAuthor(@Valid @RequestBody authorInput: AuthorInput){
-        authorRepo.save(Author(authorInput.name))
-    }
+    @PostMapping("/author-list")
+    fun createAuthor(@Valid @RequestBody authorInput: AuthorInput) = authorService.createAuthor(authorInput)
+
     
     @PutMapping("/{authorId}")
-    fun updateAuthor(@PathVariable authorId: Long,@Valid @RequestBody authorInput: AuthorInput){
-        val existOfAuthor = authorById(authorId)
-        existOfAuthor.name = authorInput.name
-        authorRepo.save(existOfAuthor)
-    }
+    fun updateAuthor(@PathVariable authorId: Long,@Valid @RequestBody authorInput: AuthorInput) = authorService.updateAuthor(authorId, authorInput)
     
     @DeleteMapping("/{authorId}")
-    fun deleteAuthor(@PathVariable authorId: Long) {
-        val existOfAuthor = authorById(authorId)
-        for (i in existOfAuthor.posts){
-            postController.postRepo.delete(i)
-        }
-        authorRepo.delete(existOfAuthor)
-    }
+    fun deleteAuthor(@PathVariable authorId: Long) = authorService.deleteAuthor(authorId)
+
 }
